@@ -1,6 +1,6 @@
 # --- BEÁLLÍTÁSOK ---
 $imageUrl = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSX0Wk8JWgBjIsFG0P6B2llzBQvEKd-ObDiPQ&s" # Ide írd a kép közvetlen linkjét
-$bottomText = "Meg lettel hackelve majom"   # Ide írd a szöveget
+$bottomText = "Meg lettel hackelve kutya"   # Ide írd a szöveget
 # -------------------
  
 Add-Type -AssemblyName System.Windows.Forms
