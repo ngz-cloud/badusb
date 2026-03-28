@@ -1,1 +1,52 @@
+# --- BEÁLLÍTÁSOK ---
+$imageUrl = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSX0Wk8JWgBjIsFG0P6B2llzBQvEKd-ObDiPQ&s" # Ide írd a kép közvetlen linkjét
+$bottomText = "meg lettel hackelve kutya"   # Ide írd a szöveget
+# -------------------
 
+Add-Type -AssemblyName System.Windows.Forms
+Add-Type -AssemblyName System.Drawing
+
+# Ablak létrehozása
+$form = New-Object Windows.Forms.Form
+$form.Text = "Fullscreen Image"
+$form.FormBorderStyle = 'None'
+$form.WindowState = 'Maximized'
+$form.TopMost = $true
+$form.BackColor = 'Black'
+
+# Kép letöltése és betöltése
+$wc = New-Object System.Net.WebClient
+try {
+    $imgData = $wc.DownloadData($imageUrl)
+    $ms = New-Object System.IO.MemoryStream($imgData, 0, $imgData.Length)
+    $image = [System.Drawing.Image]::FromStream($ms)
+    
+    $pictureBox = New-Object Windows.Forms.PictureBox
+    $pictureBox.Image = $image
+    $pictureBox.Dock = 'Fill'
+    $pictureBox.SizeMode = 'Zoom'
+    $form.Controls.Add($pictureBox)
+} catch {
+    Write-Host "Hiba a kép letöltésekor!" -ForegroundColor Red
+}
+
+# Szöveg felirat az alján
+$label = New-Object Windows.Forms.Label
+$label.Text = $bottomText
+$label.Font = New-Object System.Drawing.Font("Arial", 40, [System.Drawing.FontStyle]::Bold)
+$label.ForeColor = 'White'
+$label.BackColor = 'Transparent'
+$label.TextAlign = 'BottomCenter'
+$label.Dock = 'Bottom'
+$label.Height = 100
+$form.Controls.Add($label)
+$label.BringToFront()
+
+# KILÉPÉS MEGAKADÁLYOZÁSA
+# Letiltja a bezárás gombot és az Alt+F4-et
+$form.Add_Closing({
+    $_.Cancel = $true
+})
+
+# Megjelenítés
+$form.ShowDialog()
