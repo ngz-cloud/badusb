@@ -1,75 +1,12 @@
-# Ablak elrejtése az elején
-$showWindowAsync = Add-Type -MemberDefinition @"
-[DllImport("user32.dll")]
-public static extern bool ShowWindowAsync(IntPtr hWnd, int nCmdShow);
-"@ -Name "Win32ShowWindowAsync" -Namespace Win32Functions -PassThru
+# Elrejti a PowerShell ablakát (csak egy pillanatra villanhat, utána eltűnik)
+Add-Type -Name Window -Namespace Console -MemberDefinition '
+[DllImport("Kernel32.dll")] public static extern IntPtr GetConsoleWindow();
+[DllImport("User32.dll")] public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+'
+$consolePtr = [Console.Window]::GetConsoleWindow()
+[Console.Window]::ShowWindow($consolePtr, 0)
 
-$psWindow = (Get-Process -Id $PID).MainWindowHandle
-if ($psWindow -ne [IntPtr]::Zero) {
-    $showWindowAsync::ShowWindowAsync($psWindow, 0) # 0 = SW_HIDE
-}
-
-Add-Type -AssemblyName System.Windows.Forms
-Add-Type -AssemblyName System.Drawing
-
-[System.Windows.Forms.Application]::EnableVisualStyles()
-
-$screen = [System.Windows.Forms.Screen]::PrimaryScreen.WorkingArea
-$rand = New-Object System.Random
-$forms = New-Object System.Collections.Generic.List[System.Windows.Forms.Form]
-
-for ($i = 1; $i -le 15; $i++) {
-    $form = New-Object System.Windows.Forms.Form
-    $form.Text = "Windows Security Alert"
-    $form.Size = New-Object System.Drawing.Size(320,160)
-    $form.StartPosition = "Manual"
-    $form.TopMost = $true
-    $form.FormBorderStyle = "FixedDialog"
-    $form.MaximizeBox = $false
-    $form.MinimizeBox = $false
-    $form.BackColor = [System.Drawing.Color]::FromArgb(180,0,0)
-
-    $x = $rand.Next(0, [Math]::Max(1, $screen.Width - $form.Width))
-    $y = $rand.Next(0, [Math]::Max(1, $screen.Height - $form.Height))
-    $form.Location = New-Object System.Drawing.Point($x, $y)
-
-    $header = New-Object System.Windows.Forms.Panel
-    $header.Size = New-Object System.Drawing.Size(320,35)
-    $header.BackColor = [System.Drawing.Color]::Red
-    $header.Dock = "Top"
-    $form.Controls.Add($header)
-
-    $headerLabel = New-Object System.Windows.Forms.Label
-    $headerLabel.Text = "⚠ CRITICAL WARNING"
-    $headerLabel.ForeColor = [System.Drawing.Color]::White
-    $headerLabel.Font = New-Object System.Drawing.Font("Arial",10,[System.Drawing.FontStyle]::Bold)
-    $headerLabel.TextAlign = "MiddleCenter"
-    $headerLabel.Dock = "Fill"
-    $header.Controls.Add($headerLabel)
-
-    $label = New-Object System.Windows.Forms.Label
-    $label.Text = "VIRUS DETECTED!"
-    $label.ForeColor = [System.Drawing.Color]::White
-    $label.Font = New-Object System.Drawing.Font("Arial",13,[System.Drawing.FontStyle]::Bold)
-    $label.Size = New-Object System.Drawing.Size(280,40)
-    $label.Location = New-Object System.Drawing.Point(20,50)
-    $label.TextAlign = "MiddleCenter"
-    $form.Controls.Add($label)
-
-    $button = New-Object System.Windows.Forms.Button
-    $button.Text = "OK"
-    $button.BackColor = [System.Drawing.Color]::White
-    $button.Size = New-Object System.Drawing.Size(80,30)
-    $button.Location = New-Object System.Drawing.Point(120,100)
-    $button.Add_Click({ $this.FindForm().Close() })
-    $form.Controls.Add($button)
-
-    $forms.Add($form)
-}
-
-foreach ($form in $forms) { $null = $form.Show() }
-
-while ($forms.Exists({ param($f) -not $f.IsDisposed })) {
-    [System.Windows.Forms.Application]::DoEvents()
-    Start-Sleep -Milliseconds 50
+# 20 darab "virus decected" üzenetablak indítása egyszerre, egymástól függetlenül
+for ($i = 0; $i -lt 20; $i++) {
+    Start-Process powershell.exe -ArgumentList "-WindowStyle Hidden -Command `"Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.MessageBox]::Show('virus decected', 'Virus Alert', [System.Windows.Forms.MessageBoxButtons]::OK)`"" -WindowStyle Hidden
 }
