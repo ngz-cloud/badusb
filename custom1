@@ -8,5 +8,5 @@ $consolePtr = [Console.Window]::GetConsoleWindow()
 
 # 20 darab "virus decected" üzenetablak indítása egyszerre, egymástól függetlenül
 for ($i = 0; $i -lt 20; $i++) {
-    Start-Process powershell.exe -ArgumentList "-WindowStyle Hidden -Command `"Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.MessageBox]::Show('virus decected', 'Virus Alert', [System.Windows.Forms.MessageBoxButtons]::OK)`"" -WindowStyle Hidden
+    Start-Process powershell.exe -ArgumentList "-WindowStyle Hidden -Command `"Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.MessageBox]::Show('virus eszlelve', 'Virus Alert', [System.Windows.Forms.MessageBoxButtons]::OK)`"" -WindowStyle Hidden
 }
