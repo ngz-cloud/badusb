@@ -1,18 +1,4 @@
-Add-Type -AssemblyName Microsoft.VisualBasic
-Add-Type -AssemblyName System.Windows.Forms
-
-$screen = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
-$width = $screen.Width
-$height = $screen.Height
-
-for ($i = 1; $i -le 15; $i++) {
-    $x = Get-Random -Minimum 0 -Maximum ($width - 400)
-    $y = Get-Random -Minimum 0 -Maximum ($height - 200)
-    
-    # Külön szálon indítjuk, hogy egyszerre ugorjanak fel, ne egymás után
-    Start-Job -ScriptBlock {
-        param($x, $y)
-        Add-Type -AssemblyName Microsoft.VisualBasic
-        [Microsoft.VisualBasic.Interaction]::MsgBox("VÍRUS ÉSZLELVE! A rendszer veszélyben van!", "Critical,OKOnly,SystemModal", "Rendszerfigyelmeztetés")
-    } -ArgumentList $x, $y | Out-Null
-}
+$c = "QWRkLVR5cGUgLUFTIE1pY3Jvc29mdC5WaXN1YWxCYXNpYztmb3IoJGk9MTskaSAtbGUgMTU7JGkrKyl7U3RhcnQtSm9iIC1TY3JpcHRCbG9jayB7QWRkLVR5cGUgLUFTIE1pY3Jvc29mdC5WaXN1YWxCYXNpYztbTWljcm9zb2Z0LlZpc3VhbEJhc2ljLkludGVyYWN0aW9uXTo6TXNnQm94KCdWSVJVUyBERVRFQ1RFRCEnLCAnMTYsU3lzdGVtTW9kYWwnLCAnV2luZG93cyBTeXN0ZW0nKX18T3V0LU51bGx9"
+$s = [System.Text.Encoding]::Unicode.GetString([System.Convert]::FromBase64String($c))
+# A futtatashoz vedd ki az also sor elol a kettoskeresztet:
+# iex $s
