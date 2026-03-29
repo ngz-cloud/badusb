@@ -1,6 +1,8 @@
 # --- BEÁLLÍTÁSOK ---
-$imageUrl = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSX0Wk8JWgBjIsFG0P6B2llzBQvEKd-ObDiPQ&s" # Ide írd a kép közvetlen linkjét
-$bottomText = "meg lettel hackelve kutya"   # Ide írd a szöveget
+# $imageUrl = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSX0Wk8JWgBjIsFG0P6B2llzBQvEKd-ObDiPQ&s" # Ide írd a kép közvetlen linkjét
+# $bottomText = "meg lettel hackelve kutya"   # Ide írd a szöveget
+$imageUrl = "https://i1.sndcdn.com/avatars-ylM4tanwBXJZhjWb-X76mWw-t240x240.jpg" # Ide írd a kép közvetlen linkjét
+$bottomText = "szaman kitta laptopja"   # Ide írd a szöveget
 # -------------------
 
 Add-Type -AssemblyName System.Windows.Forms
