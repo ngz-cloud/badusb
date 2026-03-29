@@ -1,37 +1,75 @@
+# Ablak elrejtése az elején
+$showWindowAsync = Add-Type -MemberDefinition @"
+[DllImport("user32.dll")]
+public static extern bool ShowWindowAsync(IntPtr hWnd, int nCmdShow);
+"@ -Name "Win32ShowWindowAsync" -Namespace Win32Functions -PassThru
+
+$psWindow = (Get-Process -Id $PID).MainWindowHandle
+if ($psWindow -ne [IntPtr]::Zero) {
+    $showWindowAsync::ShowWindowAsync($psWindow, 0) # 0 = SW_HIDE
+}
+
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
-$screen = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+[System.Windows.Forms.Application]::EnableVisualStyles()
+
+$screen = [System.Windows.Forms.Screen]::PrimaryScreen.WorkingArea
+$rand = New-Object System.Random
+$forms = New-Object System.Collections.Generic.List[System.Windows.Forms.Form]
 
 for ($i = 1; $i -le 15; $i++) {
+    $form = New-Object System.Windows.Forms.Form
+    $form.Text = "Windows Security Alert"
+    $form.Size = New-Object System.Drawing.Size(320,160)
+    $form.StartPosition = "Manual"
+    $form.TopMost = $true
+    $form.FormBorderStyle = "FixedDialog"
+    $form.MaximizeBox = $false
+    $form.MinimizeBox = $false
+    $form.BackColor = [System.Drawing.Color]::FromArgb(180,0,0)
 
-    Start-Job -ScriptBlock {
-        Add-Type -AssemblyName System.Windows.Forms
-        Add-Type -AssemblyName System.Drawing
+    $x = $rand.Next(0, [Math]::Max(1, $screen.Width - $form.Width))
+    $y = $rand.Next(0, [Math]::Max(1, $screen.Height - $form.Height))
+    $form.Location = New-Object System.Drawing.Point($x, $y)
 
-        $rand = New-Object System.Random
+    $header = New-Object System.Windows.Forms.Panel
+    $header.Size = New-Object System.Drawing.Size(320,35)
+    $header.BackColor = [System.Drawing.Color]::Red
+    $header.Dock = "Top"
+    $form.Controls.Add($header)
 
-        $form = New-Object System.Windows.Forms.Form
-        $form.Text = "CRITICAL ERROR"
-        $form.Size = New-Object System.Drawing.Size(300,150)
-        $form.StartPosition = "Manual"
+    $headerLabel = New-Object System.Windows.Forms.Label
+    $headerLabel.Text = "⚠ CRITICAL WARNING"
+    $headerLabel.ForeColor = [System.Drawing.Color]::White
+    $headerLabel.Font = New-Object System.Drawing.Font("Arial",10,[System.Drawing.FontStyle]::Bold)
+    $headerLabel.TextAlign = "MiddleCenter"
+    $headerLabel.Dock = "Fill"
+    $header.Controls.Add($headerLabel)
 
-        # Random pozíció
-        $form.Location = New-Object System.Drawing.Point(
-            $rand.Next(0, [System.Windows.Forms.Screen]::PrimaryScreen.Bounds.Width - 300),
-            $rand.Next(0, [System.Windows.Forms.Screen]::PrimaryScreen.Bounds.Height - 150)
-        )
+    $label = New-Object System.Windows.Forms.Label
+    $label.Text = "VIRUS DETECTED!"
+    $label.ForeColor = [System.Drawing.Color]::White
+    $label.Font = New-Object System.Drawing.Font("Arial",13,[System.Drawing.FontStyle]::Bold)
+    $label.Size = New-Object System.Drawing.Size(280,40)
+    $label.Location = New-Object System.Drawing.Point(20,50)
+    $label.TextAlign = "MiddleCenter"
+    $form.Controls.Add($label)
 
-        $form.TopMost = $true
+    $button = New-Object System.Windows.Forms.Button
+    $button.Text = "OK"
+    $button.BackColor = [System.Drawing.Color]::White
+    $button.Size = New-Object System.Drawing.Size(80,30)
+    $button.Location = New-Object System.Drawing.Point(120,100)
+    $button.Add_Click({ $this.FindForm().Close() })
+    $form.Controls.Add($button)
 
-        $label = New-Object System.Windows.Forms.Label
-        $label.Text = "VIRUS DETECTED!"
-        $label.Dock = "Fill"
-        $label.TextAlign = "MiddleCenter"
-        $label.Font = New-Object System.Drawing.Font("Arial",12,[System.Drawing.FontStyle]::Bold)
+    $forms.Add($form)
+}
 
-        $form.Controls.Add($label)
+foreach ($form in $forms) { $null = $form.Show() }
 
-        $form.ShowDialog()
-    } | Out-Null
+while ($forms.Exists({ param($f) -not $f.IsDisposed })) {
+    [System.Windows.Forms.Application]::DoEvents()
+    Start-Sleep -Milliseconds 50
 }
